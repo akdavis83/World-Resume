@@ -1,0 +1,162 @@
+<link rel="icon" href="github.png" />
+<style>
+    .full-page-link {
+       display: block;
+       width: 100%;
+       height: 100vh;
+       text-decoration: none;
+       cursor: pointer;
+        /* Optional background color */
+     }
+   
+   </style>
+   <a href="https://akdavis83.github.io/Resume/" class="full-page-link">
+<base href="https://docs.lume.io/examples/hello-world/example.html" />
+<script src="../../importmap.js"></script>
+
+
+<!-- Watch the moon's shadow on the Earth! -->
+
+<!-- By default a <lume-scene> fills the space of it's parent, in this case the <body>. -->
+<lume-scene id="scene" webgl shadowmap-type="pcfsoft">
+	<!-- This is a temporary wrapper element until we adjust transform math for
+	DirectionalLight because it currently points at the Three.js origin (that's
+	where align-point 0.5,0.5 is inside the scene) instead of Lume's origin
+	(that's where align-point 0,0 is inside the scene). -->
+	<lume-element3d align-point="0.5 0.5">
+		<!-- A camera rig gives us a default view that we can rotate by
+		dragging, and zoom in and out by scrolling or pinching with fingers. -->
+		<lume-camera-rig distance="600" min-distance="90" max-distance="2000"></lume-camera-rig>
+
+		<!-- Stars -->
+		<!-- The stars are simply a big sphere, big enough that our camera view
+		and the earth are inside of it, and we're simply seeing an image of
+		stars on the inner surface of the sphere, as if we're inside of a big
+		ball. -->
+		<lume-sphere
+			id="stars"
+			texture="./galaxy_starfield.png"
+			receive-shadow="false"
+			has="basic-material"
+			sidedness="back"
+			size="4000 4000 4000"
+			mount-point="0.5 0.5 0.5"
+			color="white"
+		></lume-sphere>
+
+		<!-- Sun light -->
+		<!-- We use wrapper elements to rotate the light to where we want it. -->
+		<lume-element3d rotation="0 -50 0">
+			<lume-element3d rotation="10 0 0">
+				<!-- "Sun light" is implemented with a directional light that
+				simply points from its position towards the world origin. In a
+				future release the API will allow directional light to go in the
+				direction of a specified target element, which is easier to
+				reason about.
+				Set debug="true" to see the visuals for debugging the
+				directional light and its shadow camera. -->
+				<lume-directional-light
+					id="light"
+					debug="false"
+					size="0 0"
+					position="0 0 1800"
+					color="white"
+					intensity="2"
+					distance="10000"
+					xxx="Here we adjust the shadow camera size so it fits around the earth and moon, making the shadow as crisp as possible without increasing the shadow texture size."
+					shadow-camera-near="1500"
+					shadow-camera-far="2100"
+					shadow-camera-top="100"
+					shadow-camera-right="100"
+					shadow-camera-bottom="-100"
+					shadow-camera-left="-100"
+				></lume-directional-light>
+			</lume-element3d>
+		</lume-element3d>
+
+		<!-- Earth rotation -->
+		<!-- Wrapper elements to rotate the Earth sphere to the desired initial orientation. -->
+		<lume-element3d>
+			<lume-element3d rotation="0 180 0">
+				<!-- Earth -->
+				<!-- Earth is a sphere with an earth texture applied. -->
+				<lume-sphere
+					id="earth"
+					texture="./earthmap1k.jpg"
+					bump-map="./earthbump1k.jpg"
+					specular-map="./earthspec1k.jpg"
+					size="120 120 120"
+					mount-point="0.5 0.5 0.5"
+					color="white"
+				>
+					<!-- Clouds -->
+					<!-- Clouds are a sphere, slightly bigger than the Earth
+					sphere, with a mostly-transparent image of clouds used for
+					the texture. -->
+					<lume-sphere
+						id="clouds"
+						texture="./earthclouds.png"
+						opacity="0.7"
+						size="125 125 125"
+						mount-point="0.5 0.5 0.5"
+						align-point="0.5 0.5 0.5"
+						color="white"
+					></lume-sphere>
+				</lume-sphere>
+			</lume-element3d>
+
+			<!-- Moon rotation -->
+			<lume-element3d rotation="90 10 0">
+				<lume-element3d id="moonRotator" rotation="0 0 40">
+					<!-- Moon -->
+					<!-- Another sphere. -->
+					<lume-sphere
+						id="moon"
+						texture="./moon.jpg"
+						position="250"
+						size="5 5 5"
+						mount-point="0.5 0.5 0.5"
+						color="white"
+					></lume-sphere>
+				</lume-element3d>
+			</lume-element3d>
+		</lume-element3d>
+	</lume-element3d>
+</lume-scene>
+
+<style>
+	html,
+	body {
+		background: #222;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		overflow: hidden;
+	}
+
+	lume-scene * {
+		pointer-events: none;
+	}
+</style>
+
+<script type="module">
+	import 'lume'
+
+	// We wrote the rotation function this way based on `dt` so that rotation
+	// will always start at the angle defined in the HTML.
+	let lastTime = performance.now()
+	let dt = 0
+	moonRotator.rotation = (x, y, z, time) => {
+		dt = time - lastTime
+		lastTime = time
+		return [x, y, z + dt * 0.01]
+	}
+
+	// ^ We could've written it more simply but then rotation would start at an angle
+	// based on the current time instead of our preferred starting angle:
+	// moonRotator.rotation = (x, y, z, t) => [x, y, t * 0.004];
+
+	earth.rotation = (x, y, z, t) => [x, t * 0.01, z]
+	clouds.rotation = (x, y, z, t) => [x, -t * 0.003, z]
+</script>
+</a>
